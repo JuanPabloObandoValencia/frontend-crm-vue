@@ -1,7 +1,7 @@
 <template>
-  <UserForm />
+  <UserLogin></UserLogin>
 </template>
 
 <script setup lang="ts">
-import UserForm from './components/UserForm.vue'
+import UserLogin from '@/components/login/UserLogin.vue'
 </script>
