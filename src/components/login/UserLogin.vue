@@ -2,7 +2,7 @@
     <main
         class="flex flex-col lg:flex-row items-center justify-center h-screen lg:gap-32 px-6 bg-cover bg-center bg-no-repeat bg-[url('@/assets/imgs/login/background.png')]">
         <div
-            class="w-full max-w-md h-[600px] p-6 flex flex-col justify-center gap-6 border-2 rounded-[32px] bg-white/90 shadow-2xl">
+            class="w-full max-w-md h-[550px] p-6 flex flex-col justify-center gap-6 border-2 rounded-[32px] bg-white/90 shadow-2xl">
             <h1 class="text-center text-2xl md:text-4xl lg:text-5xl text-[#325C5E] font-bold">Iniciar sesión</h1>
 
             <div class="flex flex-col items-center justify-center">
@@ -15,7 +15,7 @@
 
                 <div class="flex flex-col mt-8 gap-4">
                     <BaseButton variant="primary">Ingresar</BaseButton>
-                    <BaseButton variant="secondary">Registrar</BaseButton>
+                    <BaseButton variant="secondary" @click="goToRegister">Registrar</BaseButton>
                 </div>
             </div>
         </div>
@@ -33,9 +33,27 @@
 <script lang="ts">
 import BaseInput from "@/components/ui/BaseInput.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
+import { useRouter } from "vue-router";
 
 export default {
+
     name: "UserLogin",
     components: { BaseInput, BaseButton },
+
+    setup() {
+
+        const router = useRouter();
+
+        const goToRegister = () => {
+
+            router.push({ name: "sigin" })
+
+        }
+
+        return { goToRegister }
+
+    }
+
 };
+
 </script>
