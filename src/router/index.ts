@@ -1,8 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import UserLogin from '@/components/login/UserLogin.vue'
+import UserSigin from '@/components/sigin/UserSigin.vue';
+import ExampleComponent from '@/components/login/ExampleComponent.vue';
+
+const routes = [
+
+  { path: '/', redirect: '/login' },
+  { path: '/login', name: 'login', component: UserLogin},
+  { path: '/signIn', name: 'signIn', component: UserSigin},
+  { path: '/example', name: 'example', component: ExampleComponent }
+
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [],
+  routes,
 })
 
 export default router
