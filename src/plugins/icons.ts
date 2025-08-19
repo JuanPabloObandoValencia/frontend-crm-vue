@@ -1,9 +1,9 @@
 import type { App } from "vue"
 
-import { 
+import {
 
     HomeIcon, UserIcon, LockClosedIcon,
-    EyeIcon,
+    EyeIcon, EyeSlashIcon,
 
 } from "@heroicons/vue/24/solid"
 import { BellIcon } from "@heroicons/vue/24/outline"
@@ -15,5 +15,6 @@ export default {
         app.component("BellIcon", BellIcon)
         app.component("LockClosedIcon", LockClosedIcon)
         app.component("EyeIcon", EyeIcon)
+        app.component("EyeSlashIcon", EyeSlashIcon)
     },
 }

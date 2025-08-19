@@ -6,15 +6,16 @@
             <h1 class="text-center text-2xl md:text-4xl lg:text-5xl text-[#325C5E] font-bold">Iniciar sesión</h1>
 
             <div class="flex flex-col items-center justify-center">
-                <BaseInput type="email" placeholder="Correo" leftIcon="UserIcon" />
-                <BaseInput type="password" placeholder="Contraseña" leftIcon="LockClosedIcon" rightIcon="EyeIcon" />
+                <BaseInput v-model="form.email" type="email" placeholder="Correo" leftIcon="UserIcon" />
+                <BaseInput v-model="form.password" type="password" placeholder="Contraseña" leftIcon="LockClosedIcon"
+                    rightIcon="EyeIcon" />
 
                 <div class="mt-2">
                     <p class="text-sm text-[#325C5E] cursor-pointer hover:underline">Olvidé mi contraseña</p>
                 </div>
 
                 <div class="flex flex-col mt-8 gap-4">
-                    <BaseButton variant="primary">Ingresar</BaseButton>
+                    <BaseButton variant="primary" @click="submitLogin">Ingresar</BaseButton>
                     <BaseButton variant="secondary" @click="goToRegister">Registrar</BaseButton>
                 </div>
             </div>
@@ -30,30 +31,47 @@
     </main>
 </template>
 
-<script lang="ts">
-import BaseInput from "@/components/ui/BaseInput.vue";
-import BaseButton from "@/components/ui/BaseButton.vue";
-import { useRouter } from "vue-router";
+<script lang="ts" setup>
 
-export default {
+    import BaseInput from "@/components/ui/BaseInput.vue";
+    import BaseButton from "@/components/ui/BaseButton.vue";
+    import { useRouter } from "vue-router";
+    import type { Router } from "vue-router";
+    import { ref } from "vue";
+    import  axios  from "axios";
 
-    name: "UserLogin",
-    components: { BaseInput, BaseButton },
+    const router: Router = useRouter();
 
-    setup() {
+    const goToRegister = () => {
 
-        const router = useRouter();
-
-        const goToRegister = () => {
-
-            router.push({ name: "sigin" })
-
-        }
-
-        return { goToRegister }
+        router.push({ name: "signIn" })
 
     }
 
-};
+    const form = ref({
+        email: "",
+        password: ""
+    });
+
+    const submitLogin = async () => {
+
+        try {
+
+            const email = form.value.email;
+            const password = form.value.password;
+
+            const response = await axios.post("/api/auth/login", { email, password });
+
+            localStorage.setItem("token", response.data.access_token);
+
+            router.push({ name: "example" });
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
+    };
 
 </script>
