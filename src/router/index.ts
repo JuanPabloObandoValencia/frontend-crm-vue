@@ -1,14 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import UserLogin from '@/components/login/UserLogin.vue'
-import UserSigin from '@/components/sigin/UserSigin.vue';
-import ExampleComponent from '@/components/login/ExampleComponent.vue';
+import UserSigin from '@/components/sigin/UserSigin.vue'
+import DashboardComponent from '@/components/dashboard/DashboardComponent.vue';
 
 const routes = [
 
   { path: '/', redirect: '/login' },
   { path: '/login', name: 'login', component: UserLogin},
   { path: '/signIn', name: 'signIn', component: UserSigin},
-  { path: '/example', name: 'example', component: ExampleComponent }
+  { path: '/dashboard', name: 'dashboard', component: DashboardComponent }
 
 ];
 
