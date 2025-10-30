@@ -1,65 +1,126 @@
 <template>
-    <div
-        class="flex items-center w-full md:w-80 h-12 border-2 shadow-sm mt-4 mb-4 px-3 rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#325C5E]">
-
-        <component :is="leftIcon" class="h-8 w-8 text-[#325C5E]" v-if="leftIcon" />
-
-        <input :type="inputType" :placeholder="placeholder" class="md:w-80 px-3 focus:outline-none flex-1"
-            :value="modelValue" @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)" />
-
-        <component :is="currentIcon" class="h-8 w-8 text-[#325C5E] cursor-pointer" v-if="rightIcon"
-            @click="togglePassword" />
+    <div class="flex flex-col w-full md:w-80">
+        <div class="flex items-center h-12 border-2 shadow-sm px-3 rounded-3xl" :class="{
+            'focus-within:ring-2 focus-within:ring-[#325C5E]': true,
+            'border-red-500': showValidationError,
+        }">
+            <component :is="leftIcon" class="h-8 w-8 text-[#325C5E]" v-if="leftIcon" />
+            <input :type="computedInputType" :placeholder="placeholder" class="flex-1 px-3 focus:outline-none"
+                :value="modelValue" @input="updateValue" />
+            <component :is="computedRightIcon" class="h-8 w-8 text-[#325C5E] cursor-pointer" v-if="rightIcon"
+                @click="togglePasswordVisibility" />
+        </div>
+        <p v-if="showValidationError" class="text-red-500 text-sm m-1">
+            <span v-if="required && !modelValue">Por favor, completa este campo.</span>
+            <span v-else-if="!isValidEmail">Por favor, introduce un correo electrónico válido.</span>
+        </p>
     </div>
 </template>
 
 <script setup lang="ts">
 
-import { defineProps, defineEmits, ref, computed } from "vue";
+    import { ref, computed } from "vue";
 
-const props = defineProps({
-    modelValue: { type: String, default: "" },
-    type: { type: String, default: "text" },
-    placeholder: { type: String, default: "" },
-    leftIcon: { type: String, default: null },
-    rightIcon: { type: String, default: null },
-});
+    const props = defineProps({
 
-const emit = defineEmits(["update:modelValue"]);
+        modelValue: {
+            type: String,
+            default: "",
+        },
+        type: {
+            type: String,
+            default: "text",
+            validator: (value: string) => ["text", "password", "email"].includes(value),
+        },
+        placeholder: {
+            type: String,
+            default: "",
+        },
+        leftIcon: {
+            type: [String, Object],
+            default: null,
+        },
+        rightIcon: {
+            type: [String, Object],
+            default: null,
+        },
+        required: {
+            type: Boolean,
+            default: false,
+        },
+        touched: {
+            type: Boolean,
+            default: false,
+        },
 
-const showPassword = ref(false);
+    });
 
-const inputType = computed(() => {
+    const emit = defineEmits(["update:modelValue"]);
 
-    if (props.type === "password") {
+    const showPassword = ref(false);
 
-        return showPassword.value ? "text" : "password";
+    const isValidEmail = computed(() => {
 
-    }
+        if (props.type === "email") {
 
-    return props.type;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-});
+            return emailRegex.test(props.modelValue);
 
-const currentIcon = computed(() => {
+        }
 
-    if (props.type === "password" && props.rightIcon === "EyeIcon") {
+        return true;
 
-        return showPassword.value ? "EyeSlashIcon" : "EyeIcon";
+    });
 
-    }
+    const showValidationError = computed(() => {
 
-    return props.rightIcon;
+        const isRequiredAndEmpty = props.required && !props.modelValue && props.touched;
 
-});
+        const isEmailInvalid = props.type === 'email' && !isValidEmail.value && props.modelValue.length > 0;
 
-const togglePassword = () => {
+        return isRequiredAndEmpty || (props.touched && isEmailInvalid);
 
-    if (props.type === "password") {
+    });
 
-        showPassword.value = !showPassword.value;
+    const computedInputType = computed(() => {
 
-    }
+        if (props.type === "password") {
 
-};
+            return showPassword.value ? "text" : "password";
+
+        }
+
+        return props.type;
+
+    });
+
+    const computedRightIcon = computed(() => {
+
+        if (props.type === "password" && props.rightIcon) {
+
+            return showPassword.value ? "EyeSlashIcon" : "EyeIcon";
+
+        }
+
+        return props.rightIcon;
+
+    });
+
+    const updateValue = (event: Event) => {
+
+        emit("update:modelValue", (event.target as HTMLInputElement).value);
+
+    };
+
+    const togglePasswordVisibility = () => {
+
+        if (props.type === "password") {
+
+            showPassword.value = !showPassword.value;
+
+        }
+
+    };
 
 </script>

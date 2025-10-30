@@ -3,7 +3,9 @@ import type { App } from "vue"
 import {
 
     HomeIcon, UserIcon, LockClosedIcon,
-    EyeIcon, EyeSlashIcon,
+    EyeIcon, EyeSlashIcon, ChartBarIcon,
+    CurrencyDollarIcon, UsersIcon, FireIcon,
+    ClipboardDocumentCheckIcon
 
 } from "@heroicons/vue/24/solid"
 import { BellIcon } from "@heroicons/vue/24/outline"
@@ -16,5 +18,10 @@ export default {
         app.component("LockClosedIcon", LockClosedIcon)
         app.component("EyeIcon", EyeIcon)
         app.component("EyeSlashIcon", EyeSlashIcon)
+        app.component("ChartBarIcon", ChartBarIcon)
+        app.component("CurrencyDollarIcon", CurrencyDollarIcon)
+        app.component("UsersIcon", UsersIcon)
+        app.component("FireIcon", FireIcon)
+        app.component("ClipboardDocumentCheckIcon", ClipboardDocumentCheckIcon)
     },
 }
