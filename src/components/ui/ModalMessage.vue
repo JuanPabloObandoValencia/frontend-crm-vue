@@ -31,7 +31,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, computed } from "vue";
 
-// Definir las propiedades con tipado mejorado
 const props = defineProps({
     show: {
         type: Boolean,
@@ -47,13 +46,10 @@ const props = defineProps({
     },
 });
 
-// Definir los eventos que puede emitir el componente
 const emit = defineEmits(["update:show", "close"]);
 
-// ID para accesibilidad
 const modalTitleId = computed(() => `modal-title-${Math.random().toString(36).substring(2, 9)}`);
 
-// Función para cerrar la modal
 const closeModal = () => {
     emit("update:show", false);
     emit("close");
