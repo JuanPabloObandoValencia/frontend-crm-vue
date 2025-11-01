@@ -4,7 +4,9 @@
             <!-- Header -->
             <div class="flex justify-between items-start mb-4">
                 <div>
-                    <h2 class="text-2xl font-semibold text-gray-800">Crear Nueva Tarea</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800">
+                        Crear Nueva Tarea
+                    </h2>
                     <p class="text-gray-500 text-sm">
                         Completa los detalles de la tarea para agregarla al proyecto.
                     </p>
@@ -16,6 +18,7 @@
 
             <!-- Formulario -->
             <form @submit.prevent="submitForm" class="space-y-5">
+                <!-- Título -->
                 <div>
                     <label class="font-semibold text-gray-700">Título de la tarea *</label>
                     <input v-model="form.title" type="text" placeholder="Ej: Diseñar página de inicio"
@@ -23,6 +26,7 @@
                         required />
                 </div>
 
+                <!-- Descripción -->
                 <div>
                     <label class="font-semibold text-gray-700">Descripción</label>
                     <textarea v-model="form.description" placeholder="Describe los detalles de la tarea..."
@@ -30,6 +34,7 @@
                         rows="3"></textarea>
                 </div>
 
+                <!-- Proyecto / Asignado a -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="font-semibold text-gray-700">Proyecto *</label>
@@ -37,9 +42,9 @@
                             class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#325C5E] outline-none"
                             required>
                             <option value="">Selecciona un proyecto</option>
-                            <option>Desarrollo Web</option>
-                            <option>Marketing Digital</option>
-                            <option>Diseño UX/UI</option>
+                            <option v-for="p in projects" :key="p.id" :value="p.id">
+                                {{ p.name }}
+                            </option>
                         </select>
                     </div>
 
@@ -48,35 +53,41 @@
                         <select v-model="form.assignee"
                             class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#325C5E] outline-none">
                             <option value="">Selecciona un usuario</option>
-                            <option>Juan Pérez</option>
-                            <option>Ana Gómez</option>
-                            <option>Pedro Ruiz</option>
+                            <option v-for="u in users" :key="u.id" :value="u.id">
+                                {{ u.first_name }} {{ u.first_last_name }}
+                            </option>
                         </select>
                     </div>
                 </div>
 
+                <!-- Prioridad / Estado -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="font-semibold text-gray-700">Prioridad</label>
+                        <label class="font-semibold text-gray-700">Prioridad *</label>
                         <select v-model="form.priority"
-                            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#325C5E] outline-none">
-                            <option>Baja</option>
-                            <option>Media</option>
-                            <option>Alta</option>
+                            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#325C5E] outline-none"
+                            required>
+                            <option value="">Selecciona prioridad</option>
+                            <option v-for="p in priorities" :key="p.id" :value="p.id">
+                                {{ p.name }}
+                            </option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="font-semibold text-gray-700">Estado</label>
+                        <label class="font-semibold text-gray-700">Estado *</label>
                         <select v-model="form.status"
-                            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#325C5E] outline-none">
-                            <option>Por Hacer</option>
-                            <option>En Progreso</option>
-                            <option>Completada</option>
+                            class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#325C5E] outline-none"
+                            required>
+                            <option value="">Selecciona estado</option>
+                            <option v-for="s in statuses" :key="s.id" :value="s.id">
+                                {{ s.name }}
+                            </option>
                         </select>
                     </div>
                 </div>
 
+                <!-- Fecha de vencimiento -->
                 <div>
                     <label class="font-semibold text-gray-700">Fecha de vencimiento</label>
                     <div class="relative">
@@ -86,6 +97,7 @@
                     </div>
                 </div>
 
+                <!-- Etiquetas -->
                 <div>
                     <label class="font-semibold text-gray-700">Etiquetas</label>
                     <input v-model="form.tags" type="text"
@@ -109,28 +121,79 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, defineEmits } from 'vue'
+import { reactive, ref, defineEmits, defineProps, onMounted } from "vue";
+import axios from "axios";
 
-const emit = defineEmits(['close', 'create'])
+const emit = defineEmits(["close", "create"]);
 const props = defineProps({
     show: { type: Boolean, default: false },
-})
+});
 
 const form = reactive({
-    title: '',
-    description: '',
-    project: '',
-    assignee: '',
-    priority: 'Media',
-    status: 'Por Hacer',
-    due_date: '',
-    tags: '',
-})
+    title: "",
+    description: "",
+    project: "",
+    assignee: "",
+    priority: "",
+    status: "",
+    due_date: "",
+    tags: "",
+});
 
-const close = () => emit('close')
+// -----------------------------------------------------
+// Listas dinámicas
+// -----------------------------------------------------
+const projects = ref<{ id: number; name: string }[]>([]);
+const users = ref<{ id: number; first_name: string; first_last_name: string }[]>([]);
+const priorities = ref<{ id: number; name: string }[]>([]);
+const statuses = ref<{ id: number; name: string }[]>([]);
 
-const submitForm = () => {
-    emit('create', { ...form })
-    close()
-}
+onMounted(async () => {
+    try {
+        const [projRes, userRes, prioRes, statRes] = await Promise.all([
+            axios.get("/api/projects"),
+            axios.get("/api/users"),
+            axios.get("/api/task-priorities"),
+            axios.get("/api/task-statuses"),
+        ]);
+
+        projects.value = projRes.data;
+        users.value = userRes.data;
+        priorities.value = prioRes.data;
+        statuses.value = statRes.data;
+    } catch (error: any) {
+        console.error("Error al cargar datos:", error.response?.data || error.message);
+    }
+});
+
+const close = () => emit("close");
+
+const submitForm = async () => {
+    try {
+        if (!form.title || !form.project || !form.priority || !form.status) {
+            alert("Por favor completa los campos obligatorios.");
+            return;
+        }
+
+        const payload = {
+            title: form.title,
+            description: form.description,
+            projectId: Number(form.project),
+            assignedTo: form.assignee ? Number(form.assignee) : null,
+            priorityId: Number(form.priority),
+            statusId: Number(form.status),
+            dueDate: form.due_date || null,
+        };
+
+        const res = await axios.post("/api/tasks", payload);
+        console.log("Tarea creada:", res.data);
+
+        alert("Tarea creada con éxito");
+        emit("create", res.data);
+        close();
+    } catch (error: any) {
+        console.error("Error al crear tarea:", error.response?.data || error.message);
+        alert("Ocurrió un error al crear la tarea.");
+    }
+};
 </script>

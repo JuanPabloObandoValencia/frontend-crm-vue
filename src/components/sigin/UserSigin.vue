@@ -20,38 +20,86 @@
             </div>
 
             <div class="mt-6 w-44">
-                <BaseButton variant="primary" class="w-full" @click="">Registrarse</BaseButton>
+                <BaseButton variant="primary" class="w-full" @click="submitRegister">Registrarse</BaseButton>
                 <BaseButton variant="secondary" class="w-full mt-4" @click="goToLogin">Iniciar sesión</BaseButton>
             </div>
         </div>
+
+        <SimpleModal :show="showModal" :title="modalTitle" :messages="modalMessages" @close="showModal = false" />
     </main>
 </template>
 
 <script lang="ts" setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 import BaseInput from "@/components/ui/BaseInput.vue";
 import BaseButton from "@/components/ui/BaseButton.vue";
-import { useRouter } from "vue-router";
+import SimpleModal from "@/components/ui/ModalMessage.vue";
 
+const router = useRouter();
 
+const form = reactive({
+    firstName: "",
+    secondName: "",
+    firstLastName: "",
+    secondLastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+});
 
-    const form = reactive({
-        firstName: "",
-        secondName: "",
-        firstLastName: "",
-        secondLastName: "",
-        email: "",
-        phone: "",
-        password: "",
-        confirmPassword: ""
-    });
+const showModal = ref(false);
+const modalTitle = ref("");
+const modalMessages = ref<string[]>([]);
 
-    const router = useRouter();
+const goToLogin = () => {
+    router.push({ name: "login" });
+};
 
-    const goToLogin = () => {
-
-        router.push({ name: "login" })
-
+const submitRegister = async () => {
+    if (!form.firstName || !form.firstLastName || !form.email || !form.password || !form.confirmPassword) {
+        modalTitle.value = "Campos incompletos";
+        modalMessages.value = ["Por favor, llena todos los campos obligatorios."];
+        showModal.value = true;
+        return;
     }
 
+    if (form.password !== form.confirmPassword) {
+        modalTitle.value = "Error de contraseña";
+        modalMessages.value = ["Las contraseñas no coinciden."];
+        showModal.value = true;
+        return;
+    }
+
+    try {
+        const response = await axios.post("/api/users", {
+            firstName: form.firstName,
+            secondName: form.secondName,
+            firstLastName: form.firstLastName,
+            secondLastName: form.secondLastName,
+            email: form.email,
+            phone: form.phone,
+            password: form.password,
+        });
+
+        modalTitle.value = "Registro exitoso";
+        modalMessages.value = ["Tu cuenta se creó correctamente. Ahora puedes iniciar sesión."];
+        showModal.value = true;
+
+        setTimeout(() => {
+            router.push({ name: "login" });
+        }, 2000);
+    } catch (error: any) {
+        if (axios.isAxiosError(error) && error.response) {
+            modalTitle.value = "Error en el registro";
+            modalMessages.value = [error.response.data.message || "No se pudo registrar el usuario."];
+        } else {
+            modalTitle.value = "Error inesperado";
+            modalMessages.value = ["Hubo un problema. Inténtalo más tarde."];
+        }
+        showModal.value = true;
+    }
+};
 </script>
